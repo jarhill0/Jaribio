@@ -11,17 +11,21 @@ WeekAgoEpoch = NowEpoch - 604800
 # define selftext
 selftext = "#Users removed\n\n"
 
+# opens, reads, and returns a resource
+def read_resource(resource_filename):
+	return open("Resources/" + resource_filename).read()
+
 # load sensitive data (and total user log number)
-password = open("Resources/password.txt").read()
-client_id = open("Resources/client_id.txt").read()
-client_secret = open("Resources/client_secret.txt").read()
-username = open("Resources/username.txt").read()
-TotalUserLogs = int(open("Resources/TotalUserLogs.txt").read())
+password = read_resource("password.txt)
+client_id = read_resource("client_id.txt")
+client_secret = read_resource("client_secret.txt")
+username = read_resource("username.txt")
+TotalUserLogs = int(read_resource("TotalUserLogs.txt"))
 
 # log in to Reddit
 reddit = praw.Reddit(client_id=client_id,
                      client_secret=client_secret,
-                         user_agent="Private Sub Manager",
+                     user_agent="Private Sub Manager",
                      username=username,
                      password=password)
 
