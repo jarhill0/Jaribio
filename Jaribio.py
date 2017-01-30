@@ -46,17 +46,17 @@ for i, user in enumerate(user_list):
 # find which users posted and commented
 participated = []
 not_participated = []
-old_comments = []
+old_comments = false
 for submission in reddit.subreddit(target_sub).submissions(week_ago, now):
     participated.append(submission.author)
 for comment in reddit.subreddit(target_sub).comments(limit=600):
     if comment.created_utc > week_ago:
         participated.append(comment.author)
     else:
-        old_comments.append(comment.author)
+        old_comments = true
 for i, user in enumerate(participated):
     participated[i] = user.name.strip()
-if old_comments == []:
+if not old_comments:
     print("Not all comments from the past week have been retrieved. Exiting. Raise number of comments fetched (line 48).")
     with open("Bot failed at " + time_string + ".txt", "w+") as f:
         f.write("the bot failed due to not retrieving all comments from the past week. Up the limit in line 48 and retry.")
