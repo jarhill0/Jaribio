@@ -97,16 +97,18 @@ for user in user_list_copy:
         user_list.remove(user.strip())
 
 # flair existing users with green flair or special flair class
-for i, user in enumerate(user_list):
-    if i == 0:
-        reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#1', css_class='goldnumber')
-    elif i == 1:
-        reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#2', css_class='silver')
-    elif i == 2:
-        reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#3', css_class='bronze')
-    else:
-        reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#%d' % (i + 1), css_class='number')
-    print('Flaired ' + user.strip() + '.')
+def flair_existing_users()
+    for i, user in enumerate(user_list):
+        if i == 0:
+            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#1', css_class='goldnumber')
+        elif i == 1:
+            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#2', css_class='silver')
+        elif i == 2:
+            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#3', css_class='bronze')
+        else:
+            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#%d' % (i + 1), css_class='number')
+        print('Flaired ' + user.strip() + '.')
+flair_existing_users()
 
 # Determine how many users must be added, create a file named after the time, and get that many users and save to file
 num_to_add = max(min(len(not_participated), 25), 10)
