@@ -1,8 +1,6 @@
 import praw
 import time
 
-# test comment 2.0
-
 # Configuration
 TargetSub = "Jaribio"
 # set a time string for file saving and access; find now and a week ago in seconds since epoch
