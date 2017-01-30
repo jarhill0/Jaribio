@@ -1,7 +1,7 @@
 import praw
 import time
 
-# test comment
+# test comment 2.0
 
 # Configuration
 TargetSub = "Jaribio"
