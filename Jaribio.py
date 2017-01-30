@@ -116,16 +116,15 @@ raw_new_comments = []
 for comment in reddit.subreddit('all').comments(limit=30):
     raw_new_comments.append(comment.author.name)
 
-# open a file; if number of users is less than the number to add, take a user from RawNewComments and put it in the file that becomes NewUsers
+# open a file; add users from raw_new_comments if we still need users and they are not already in user_list
 with open('New users ' + time_string + '.txt', 'w+') as f:
     n = 0
     for user in raw_new_comments:
-        if n < num_to_add:
-            if not user_list.__contains__(user.strip()):
-                f.write(str(user.strip()) + '\n')
-                n += 1
+        if n < num_to_add and not user_list.__contains__(user.strip()):
+        # open the new user file and read it line by line
+            f.write(str(user.strip()) + '\n')
+            n += 1
 
-# open the new user file and read it line by line
 new_users = open('New users ' + time_string + '.txt', 'r').readlines()
 for i, user in enumerate(new_users):
     new_users[i] = user.strip()
