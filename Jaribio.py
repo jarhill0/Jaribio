@@ -103,12 +103,8 @@ for i, user in enumerate(user_list):
     print("Flaired " + user.strip() + ".")
 
 # Determine how many users must be added, create a file named after the time, and get that many users and save to file
-if len(not_participated) < 10:
-    num_to_add = 10
-elif len(not_participated) > 25:
-    num_to_add = 25
-else:
-    num_to_add = len(not_participated)
+num_to_add = max(min(len(not_participated),25),10)
+
 # get 30 comments and put their authors in RawNewComments
 raw_new_comments = []
 for comment in reddit.subreddit('all').comments(limit=30):
