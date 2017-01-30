@@ -11,12 +11,14 @@ week_ago = now - 604800
 # define selftext
 selftext = "#Users removed\n\n"
 
+
 # opens, reads, and returns a resource
 def read_resource(resource_filename):
-	return open("Resources/" + resource_filename).read()
+    return open("Resources/" + resource_filename).read()
+
 
 # load sensitive data (and total user log number)
-password = read_resource("password.txt)
+password = read_resource('password.txt')
 client_id = read_resource("client_id.txt")
 client_secret = read_resource("client_secret.txt")
 username = read_resource("username.txt")
@@ -29,6 +31,7 @@ reddit = praw.Reddit(client_id=client_id,
                      username=username,
                      password=password)
 
+
 # function sets a flair to test if a user exists or not
 def is_user_deleted(user):
     try:
@@ -38,6 +41,7 @@ def is_user_deleted(user):
     else:
         return False
 
+
 user_list = open("UserList.txt").readlines()
 open("UserList " + time_string + ".txt", "w+").writelines(user_list)
 for i, user in enumerate(user_list):
@@ -46,20 +50,22 @@ for i, user in enumerate(user_list):
 # find which users posted and commented
 participated = []
 not_participated = []
-old_comments = false
+old_comments = False
 for submission in reddit.subreddit(target_sub).submissions(week_ago, now):
     participated.append(submission.author)
 for comment in reddit.subreddit(target_sub).comments(limit=600):
     if comment.created_utc > week_ago:
         participated.append(comment.author)
     else:
-        old_comments = true
+        old_comments = True
 for i, user in enumerate(participated):
     participated[i] = user.name.strip()
 if not old_comments:
-    print("Not all comments from the past week have been retrieved. Exiting. Raise number of comments fetched (line 48).")
+    print(
+        "Not all comments from the past week have been retrieved. Exiting. Raise number of comments fetched (line 48).")
     with open("Bot failed at " + time_string + ".txt", "w+") as f:
-        f.write("the bot failed due to not retrieving all comments from the past week. Up the limit in line 48 and retry.")
+        f.write(
+            "the bot failed due to not retrieving all comments from the past week. Up the limit in line 48 and retry.")
     exit()
 
 # Add all non-participators to a list
@@ -103,7 +109,7 @@ for i, user in enumerate(user_list):
     print("Flaired " + user.strip() + ".")
 
 # Determine how many users must be added, create a file named after the time, and get that many users and save to file
-num_to_add = max(min(len(not_participated),25),10)
+num_to_add = max(min(len(not_participated), 25), 10)
 
 # get 30 comments and put their authors in RawNewComments
 raw_new_comments = []
@@ -112,7 +118,7 @@ for comment in reddit.subreddit('all').comments(limit=30):
 
 # open a file; if number of users is less than the number to add, take a user from RawNewComments and put it in the file that becomes NewUsers
 with open("New users " + time_string + ".txt", "w+") as f:
-    n=0
+    n = 0
     for user in raw_new_comments:
         if n < num_to_add:
             if not user_list.__contains__(user.strip()):
@@ -131,17 +137,18 @@ for i, user in enumerate(new_users):
     selftext += ("\\#" + str(num_old_users + i + 1) + " - /u/" + user.strip() + "  \n")
 reddit.subreddit(target_sub).submit("Jaribio user log #" + str(total_user_logs + 1), selftext=selftext, resubmit=False)
 # sticky it
-for submission in reddit.redditor(name=username).submissions.new(limit = 1):
-    NewPost = submission.id
-reddit.submission(id=NewPost).mod.distinguish(how='yes', sticky=True)
-reddit.submission(id=NewPost).mod.sticky()
+for submission in reddit.redditor(name=username).submissions.new(limit=1):
+new_post = submission.id
+reddit.submission(id=new_post).mod.distinguish(how='yes', sticky=True)
+reddit.submission(id=new_post).mod.sticky()
 # after posting, increment the total number of user logs
 with open("Resources/TotalUserLogs.txt", "w+") as f:
     f.write(str(total_user_logs + 1))
 
 # for each new user in the file, add then as approved submitters and flair them.
 for i, user in enumerate(new_users):
-    reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text="#%d" % (num_old_users + i + 1), css_class="numbernew")
+    reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text="#%d" % (num_old_users + i + 1),
+                                           css_class="numbernew")
     print("Flaired " + user.strip() + " as new.")
     reddit.subreddit(target_sub).contributor.add(user.strip())
 
