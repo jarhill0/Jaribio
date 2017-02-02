@@ -43,7 +43,7 @@ def is_user_deleted(user):
 
 
 user_list = open('UserList.txt').readlines()
-open('UserList ' + time_string + '.txt', 'w+').writelines(user_list)
+open('UserList %s.txt' % time_string, 'w+').writelines(user_list)
 for i, user in enumerate(user_list):
     user_list[i] = user.strip()
 
@@ -61,11 +61,10 @@ for comment in reddit.subreddit(target_sub).comments(limit=600):
 for i, user in enumerate(participated):
     participated[i] = user.name.strip()
 if not old_comments:
-    print(
-        'Not all comments from the past week have been retrieved. Exiting. Raise number of comments fetched (line 48).')
-    with open('Bot failed at ' + time_string + '.txt', 'w+') as f:
+    print('Not all comments from the past week have been retrieved. Exiting. Raise number of comments fetched.')
+    with open('Bot failed at %s.txt' %time_string, 'w+') as f:
         f.write(
-            'the bot failed due to not retrieving all comments from the past week. Up the limit in line 48 and retry.')
+            'The bot failed due to not retrieving all comments from the past week. Up the limit in line 48 and retry.')
     exit()
 
 # Add all non-participators to a list
@@ -81,9 +80,9 @@ for user in not_participated:
         reddit.subreddit(target_sub).contributor.remove(user.strip())
         print('Removed %s' % user)
     except:
-        print('Removed user ' + user.strip() + ' does not exist. Everything should proceed as planned.')
+        print('Removed user %s does not exist. Everything should proceed as planned.' % user.strip())
     else:
-        print('Flaired ' + user.strip() + ' as removed.')
+        print('Flaired %s as removed.' % user.strip())
 
 # log kicked users
 with open('Removed ' + time_string + '.txt', 'w+') as f:
@@ -91,7 +90,7 @@ with open('Removed ' + time_string + '.txt', 'w+') as f:
         f.write(user.strip() + '\n')
 # update selftext with kicked users and their numbers *before* they are removed from the user list.
 for user in not_participated:
-    selftext += ('\\#' + str((user_list.index(user)) + 1) + ' - /u/' + user.strip() + '  \n')
+    selftext += ('\\#%s - /u/%s  \n' % (str((user_list.index(user)) + 1), user.strip()))
 # remove users, THE RIGHT WAY, without skipping over some of them randomly
 user_list_copy = user_list[:]
 for user in user_list_copy:
@@ -103,17 +102,16 @@ def flair_existing_users():
     for i, user in enumerate(user_list):
         if i == 0:
             reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#1', css_class='goldnumber')
-            print("Fakeflaired %s." %user)
+            print("Flaired %s." %user)
         elif i == 1:
             reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#2', css_class='silver')
-            print("Fakeflaired %s." % user)
+            print("Flaired %s." % user)
         elif i == 2:
             reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#3', css_class='bronze')
-            print("Fakeflaired %s." % user)
+            print("Flaired %s." % user)
         else:
             reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#%d' % (i + 1), css_class='number')
-            print("Fakeflaired %s." % user)
-        print('Flaired ' + user.strip() + '.')
+            print("Flaired %s." % user)
 flair_existing_users()
 
 # Determine how many users must be added, create a file named after the time, and get that many users and save to file
@@ -125,7 +123,7 @@ for comment in reddit.subreddit('all').comments(limit=30):
     raw_new_comments.append(comment.author.name)
 
 # open a file; add users from raw_new_comments if we still need users and they are not already in user_list
-with open('New users ' + time_string + '.txt', 'w+') as f:
+with open('New users %s.txt' % time_string, 'w+') as f:
     n = 0
     for user in raw_new_comments:
         if n < num_to_add and not user_list.__contains__(user.strip()):
@@ -133,7 +131,7 @@ with open('New users ' + time_string + '.txt', 'w+') as f:
             f.write(str(user.strip()) + '\n')
             n += 1
 
-new_users = open('New users ' + time_string + '.txt', 'r').readlines()
+new_users = open('New users %s.txt' %time_string, 'r').readlines()
 for i, user in enumerate(new_users):
     new_users[i] = user.strip()
 
@@ -141,15 +139,15 @@ num_old_users = len(user_list)
 # add the new users to selftext, then post it.
 selftext += ('\n#Users added\n\n')
 for i, user in enumerate(new_users):
-    selftext += ('\\#' + str(num_old_users + i + 1) + ' - /u/' + user.strip() + '  \n')
-reddit.subreddit(target_sub).submit('Jaribio user log #' + str(total_user_logs + 1), selftext=selftext, resubmit=False)
-print("FakeSubmitted")
+    selftext += ('\\#%s - /u/%s  \n' % (str(num_old_users + i + 1), user.strip()))
+reddit.subreddit(target_sub).submit('Jaribio user log #%s' % str(total_user_logs + 1), selftext=selftext, resubmit=False)
+print("Submitted")
 # sticky it
 for submission in reddit.redditor(name=username).submissions.new(limit=1):
     new_post = submission.id
 reddit.submission(id=new_post).mod.distinguish(how='yes', sticky=True)
 reddit.submission(id=new_post).mod.sticky()
-print("FakeStickied")
+print("Stickied")
 # after posting, increment the total number of user logs
 with open('Resources/TotalUserLogs.txt', 'w+') as f:
     f.write(str(total_user_logs + 1))
