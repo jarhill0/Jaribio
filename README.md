@@ -6,9 +6,9 @@ Python code for /u/Jaribio, the bot who runs /r/Jaribio
 1. set `target_sub` in the script
 2. place `UserList.txt` in the directory you plan to run the script from (I run the script from the same directory that I save it in, but you could theoretically run it from somewhere else), and format it as follows:
 
-    name1
-    name2
-    name3
+`name1
+name2
+name3`
 
 (list Reddit usernames followed imediately by newlines (no spaces). Make sure the file ends in a newline.
 3. In the directory you plan to run the script from, create a directory named `Resources`
