@@ -77,7 +77,9 @@ for user in user_list:
 for user in not_participated:
     try:
         reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='Removed', css_class='kicked')
+        print('Flaired %s' % user)
         reddit.subreddit(target_sub).contributor.remove(user.strip())
+        print('Removed %s' % user)
     except:
         print('Removed user ' + user.strip() + ' does not exist. Everything should proceed as planned.')
     else:
@@ -97,16 +99,20 @@ for user in user_list_copy:
         user_list.remove(user.strip())
 
 # flair existing users with green flair or special flair class
-def flair_existing_users()
+def flair_existing_users():
     for i, user in enumerate(user_list):
         if i == 0:
             reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#1', css_class='goldnumber')
+            print("Fakeflaired %s." %user)
         elif i == 1:
             reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#2', css_class='silver')
+            print("Fakeflaired %s." % user)
         elif i == 2:
             reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#3', css_class='bronze')
+            print("Fakeflaired %s." % user)
         else:
             reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#%d' % (i + 1), css_class='number')
+            print("Fakeflaired %s." % user)
         print('Flaired ' + user.strip() + '.')
 flair_existing_users()
 
@@ -137,21 +143,23 @@ selftext += ('\n#Users added\n\n')
 for i, user in enumerate(new_users):
     selftext += ('\\#' + str(num_old_users + i + 1) + ' - /u/' + user.strip() + '  \n')
 reddit.subreddit(target_sub).submit('Jaribio user log #' + str(total_user_logs + 1), selftext=selftext, resubmit=False)
+print("FakeSubmitted")
 # sticky it
 for submission in reddit.redditor(name=username).submissions.new(limit=1):
-new_post = submission.id
+    new_post = submission.id
 reddit.submission(id=new_post).mod.distinguish(how='yes', sticky=True)
 reddit.submission(id=new_post).mod.sticky()
+print("FakeStickied")
 # after posting, increment the total number of user logs
 with open('Resources/TotalUserLogs.txt', 'w+') as f:
     f.write(str(total_user_logs + 1))
 
 # for each new user in the file, add then as approved submitters and flair them.
 for i, user in enumerate(new_users):
-    reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#%d' % (num_old_users + i + 1),
-                                           css_class='numbernew')
+    reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#%d' % (num_old_users + i + 1), css_class='numbernew')
     print('Flaired ' + user.strip() + ' as new.')
     reddit.subreddit(target_sub).contributor.add(user.strip())
+    print('Removed %s.' %user)
 
 # rewrite UserList.txt with all removed users gone
 with open('UserList.txt', 'w+') as f:
