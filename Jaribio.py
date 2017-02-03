@@ -62,7 +62,7 @@ for i, user in enumerate(participated):
     participated[i] = user.name.strip()
 if not old_comments:
     print('Not all comments from the past week have been retrieved. Exiting. Raise number of comments fetched.')
-    with open('Bot failed at %s.txt' %time_string, 'w+') as f:
+    with open('Bot failed at %s.txt' % time_string, 'w+') as f:
         f.write(
             'The bot failed due to not retrieving all comments from the past week. Up the limit in line 48 and retry.')
     exit()
@@ -97,12 +97,13 @@ for user in user_list_copy:
     if not_participated.__contains__(user.strip()):
         user_list.remove(user.strip())
 
+
 # flair existing users with green flair or special flair class
 def flair_existing_users():
     for i, user in enumerate(user_list):
         if i == 0:
             reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#1', css_class='goldnumber')
-            print("Flaired %s." %user)
+            print("Flaired %s." % user)
         elif i == 1:
             reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#2', css_class='silver')
             print("Flaired %s." % user)
@@ -112,6 +113,8 @@ def flair_existing_users():
         else:
             reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#%d' % (i + 1), css_class='number')
             print("Flaired %s." % user)
+
+
 flair_existing_users()
 
 # Determine how many users must be added, create a file named after the time, and get that many users and save to file
@@ -127,25 +130,27 @@ with open('New users %s.txt' % time_string, 'w+') as f:
     n = 0
     for user in raw_new_comments:
         if n < num_to_add and not user_list.__contains__(user.strip()):
-        # open the new user file and read it line by line
+            # open the new user file and read it line by line
             f.write(str(user.strip()) + '\n')
             n += 1
 
-new_users = open('New users %s.txt' %time_string, 'r').readlines()
+new_users = open('New users %s.txt' % time_string, 'r').readlines()
 for i, user in enumerate(new_users):
     new_users[i] = user.strip()
 
 num_old_users = len(user_list)
 # add the new users to selftext, then post it.
-selftext += ('\n#Users added\n\n')
+selftext += '\n#Users added\n\n'
 for i, user in enumerate(new_users):
     selftext += ('\\#%s - /u/%s  \n' % (str(num_old_users + i + 1), user.strip()))
-reddit.subreddit(target_sub).submit('Jaribio user log #%s' % str(total_user_logs + 1), selftext=selftext, resubmit=False)
+reddit.subreddit(target_sub).submit('Jaribio user log #%s' % str(total_user_logs + 1), selftext=selftext,
+                                    resubmit=False)
 print("Submitted")
 # sticky it
 for submission in reddit.redditor(name=username).submissions.new(limit=1):
     new_post = submission.id
 reddit.submission(id=new_post).mod.distinguish(how='yes', sticky=True)
+print("Distinguished")
 reddit.submission(id=new_post).mod.sticky()
 print("Stickied")
 # after posting, increment the total number of user logs
@@ -154,10 +159,11 @@ with open('Resources/TotalUserLogs.txt', 'w+') as f:
 
 # for each new user in the file, add then as approved submitters and flair them.
 for i, user in enumerate(new_users):
-    reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#%d' % (num_old_users + i + 1), css_class='numbernew')
+    reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#%d' % (num_old_users + i + 1),
+                                           css_class='numbernew')
     print('Flaired ' + user.strip() + ' as new.')
     reddit.subreddit(target_sub).contributor.add(user.strip())
-    print('Removed %s.' %user)
+    print('Removed %s.' % user)
 
 # rewrite UserList.txt with all removed users gone
 with open('UserList.txt', 'w+') as f:
