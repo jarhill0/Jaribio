@@ -15,7 +15,7 @@ selftext = '#Users removed\n\n'
 
 # opens, reads, and returns a resource
 def read_resource(resource_filename):
-    return open(os.path.abspath(os.path.join('Resources/', resource_filename))).read()
+    return open(os.path.abspath(os.path.join('Resources', resource_filename))).read()
 
 
 # load sensitive data (and total user log number)
