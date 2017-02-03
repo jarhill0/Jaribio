@@ -80,11 +80,11 @@ for user in user_list:
 # attempt to flair and remove NotParticipated users
 for user in not_participated:
     try:
-        reddit.subreddit(target_sub).flair.set(redditor=user.strip(),
+        reddit.subreddit(target_sub).flair.set(redditor=user.strip(), # commentOutToTest
                                                text='Removed',
                                                css_class='kicked')
         print('Flaired %s' % user)
-        reddit.subreddit(target_sub).contributor.remove(user.strip())
+        reddit.subreddit(target_sub).contributor.remove(user.strip()) # commentOutToTest
         print('Removed %s' % user)
     except:
         print(
@@ -112,22 +112,22 @@ for user in user_list_copy:
 def flair_existing_users():
     for i, user in enumerate(user_list):
         if i == 0:
-            reddit.subreddit(target_sub).flair.set(redditor=user.strip(),
+            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), # commentOutToTest
                                                    text='#1',
                                                    css_class='goldnumber')
             print("Flaired %s." % user)
         elif i == 1:
-            reddit.subreddit(target_sub).flair.set(redditor=user.strip(),
+            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), # commentOutToTest
                                                    text='#2',
                                                    css_class='silver')
             print("Flaired %s." % user)
         elif i == 2:
-            reddit.subreddit(target_sub).flair.set(redditor=user.strip(),
+            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), # commentOutToTest
                                                    text='#3',
                                                    css_class='bronze')
             print("Flaired %s." % user)
         else:
-            reddit.subreddit(target_sub).flair.set(redditor=user.strip(),
+            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), # commentOutToTest
                                                    text='#%d' % (i + 1),
                                                    css_class='number')
             print("Flaired %s." % user)
@@ -162,13 +162,14 @@ selftext += '\n#Users added\n\n'
 for i, user in enumerate(new_users):
     selftext += ('\\#%s - /u/%s  \n' %
                  (str(num_old_users + i + 1), user.strip()))
-reddit.subreddit(target_sub).submit(
+reddit.subreddit(target_sub).submit( # commentOutToTest the submit block
     'Jaribio user log #%s' % str(total_user_logs + 1),
     selftext=selftext,
     resubmit=False)
 print("Submitted")
+print(selftext)
 # sticky it
-for submission in reddit.redditor(name=username).submissions.new(limit=1):
+for submission in reddit.redditor(name=username).submissions.new(limit=1): # commentOutToTest this and the following
     new_post = submission.id
 reddit.submission(id=new_post).mod.distinguish(how='yes', sticky=True)
 print("Distinguished")
@@ -180,12 +181,12 @@ with open('Resources/TotalUserLogs.txt', 'w+') as f:
 
 # for each new user in the file, add then as approved submitters and flair them.
 for i, user in enumerate(new_users):
-    reddit.subreddit(target_sub).flair.set(redditor=user.strip(),
+    reddit.subreddit(target_sub).flair.set(redditor=user.strip(), # commentOutToTest
                                            text='#%d' %
                                            (num_old_users + i + 1),
                                            css_class='numbernew')
     print('Flaired ' + user.strip() + ' as new.')
-    reddit.subreddit(target_sub).contributor.add(user.strip())
+    reddit.subreddit(target_sub).contributor.add(user.strip()) # commentOutToTest
     print('Removed %s.' % user)
 
 # rewrite UserList.txt with all removed users gone
