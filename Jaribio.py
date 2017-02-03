@@ -1,5 +1,6 @@
-import praw
 import time
+import praw
+import os
 
 # Configuration
 target_sub = 'Jaribio'
@@ -14,7 +15,7 @@ selftext = '#Users removed\n\n'
 
 # opens, reads, and returns a resource
 def read_resource(resource_filename):
-    return open('Resources/' + resource_filename).read()
+    return open(os.path.abspath(os.path.join('Resources/', resource_filename))).read()
 
 
 # load sensitive data (and total user log number)
@@ -25,11 +26,12 @@ username = read_resource('username.txt')
 total_user_logs = int(read_resource('TotalUserLogs.txt'))
 
 # log in to Reddit
-reddit = praw.Reddit(client_id=client_id,
-                     client_secret=client_secret,
-                     user_agent='Private Sub Manager',
-                     username=username,
-                     password=password)
+reddit = praw.Reddit(
+    client_id=client_id,
+    client_secret=client_secret,
+    user_agent='Private Sub Manager',
+    username=username,
+    password=password)
 
 
 # function sets a flair to test if a user exists or not
@@ -61,10 +63,13 @@ for comment in reddit.subreddit(target_sub).comments(limit=600):
 for i, user in enumerate(participated):
     participated[i] = user.name.strip()
 if not old_comments:
-    print('Not all comments from the past week have been retrieved. Exiting. Raise number of comments fetched.')
+    print(
+        'Not all comments from the past week have been retrieved. Exiting. Raise number of comments fetched.'
+    )
     with open('Bot failed at %s.txt' % time_string, 'w+') as f:
         f.write(
-            'The bot failed due to not retrieving all comments from the past week. Up the limit in line 48 and retry.')
+            'The bot failed due to not retrieving all comments from the past week. Up the limit in line 48 and retry.'
+        )
     exit()
 
 # Add all non-participators to a list
@@ -75,12 +80,16 @@ for user in user_list:
 # attempt to flair and remove NotParticipated users
 for user in not_participated:
     try:
-        reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='Removed', css_class='kicked')
+        reddit.subreddit(target_sub).flair.set(redditor=user.strip(),
+                                               text='Removed',
+                                               css_class='kicked')
         print('Flaired %s' % user)
         reddit.subreddit(target_sub).contributor.remove(user.strip())
         print('Removed %s' % user)
     except:
-        print('Removed user %s does not exist. Everything should proceed as planned.' % user.strip())
+        print(
+            'Removed user %s does not exist. Everything should proceed as planned.'
+            % user.strip())
     else:
         print('Flaired %s as removed.' % user.strip())
 
@@ -90,7 +99,8 @@ with open('Removed ' + time_string + '.txt', 'w+') as f:
         f.write(user.strip() + '\n')
 # update selftext with kicked users and their numbers *before* they are removed from the user list.
 for user in not_participated:
-    selftext += ('\\#%s - /u/%s  \n' % (str((user_list.index(user)) + 1), user.strip()))
+    selftext += ('\\#%s - /u/%s  \n' %
+                 (str((user_list.index(user)) + 1), user.strip()))
 # remove users, THE RIGHT WAY, without skipping over some of them randomly
 user_list_copy = user_list[:]
 for user in user_list_copy:
@@ -102,16 +112,24 @@ for user in user_list_copy:
 def flair_existing_users():
     for i, user in enumerate(user_list):
         if i == 0:
-            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#1', css_class='goldnumber')
+            reddit.subreddit(target_sub).flair.set(redditor=user.strip(),
+                                                   text='#1',
+                                                   css_class='goldnumber')
             print("Flaired %s." % user)
         elif i == 1:
-            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#2', css_class='silver')
+            reddit.subreddit(target_sub).flair.set(redditor=user.strip(),
+                                                   text='#2',
+                                                   css_class='silver')
             print("Flaired %s." % user)
         elif i == 2:
-            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#3', css_class='bronze')
+            reddit.subreddit(target_sub).flair.set(redditor=user.strip(),
+                                                   text='#3',
+                                                   css_class='bronze')
             print("Flaired %s." % user)
         else:
-            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#%d' % (i + 1), css_class='number')
+            reddit.subreddit(target_sub).flair.set(redditor=user.strip(),
+                                                   text='#%d' % (i + 1),
+                                                   css_class='number')
             print("Flaired %s." % user)
 
 
@@ -142,9 +160,12 @@ num_old_users = len(user_list)
 # add the new users to selftext, then post it.
 selftext += '\n#Users added\n\n'
 for i, user in enumerate(new_users):
-    selftext += ('\\#%s - /u/%s  \n' % (str(num_old_users + i + 1), user.strip()))
-reddit.subreddit(target_sub).submit('Jaribio user log #%s' % str(total_user_logs + 1), selftext=selftext,
-                                    resubmit=False)
+    selftext += ('\\#%s - /u/%s  \n' %
+                 (str(num_old_users + i + 1), user.strip()))
+reddit.subreddit(target_sub).submit(
+    'Jaribio user log #%s' % str(total_user_logs + 1),
+    selftext=selftext,
+    resubmit=False)
 print("Submitted")
 # sticky it
 for submission in reddit.redditor(name=username).submissions.new(limit=1):
@@ -159,7 +180,9 @@ with open('Resources/TotalUserLogs.txt', 'w+') as f:
 
 # for each new user in the file, add then as approved submitters and flair them.
 for i, user in enumerate(new_users):
-    reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#%d' % (num_old_users + i + 1),
+    reddit.subreddit(target_sub).flair.set(redditor=user.strip(),
+                                           text='#%d' %
+                                           (num_old_users + i + 1),
                                            css_class='numbernew')
     print('Flaired ' + user.strip() + ' as new.')
     reddit.subreddit(target_sub).contributor.add(user.strip())
