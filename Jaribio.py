@@ -37,9 +37,7 @@ reddit = praw.Reddit(
 # function sets a flair to test if a user exists or not
 def is_user_deleted(user):
     try:
-        reddit.subreddit('Jaribio2').flair.set(redditor=user.strip(),
-                                               text='test',
-                                               css_class='')
+        reddit.redditor(user.strip()).fullname
     except:
         return True
     else:
