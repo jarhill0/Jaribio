@@ -1,5 +1,8 @@
-import praw
+import shutil
+import os
 import time
+import prawcore
+import praw
 
 # Configuration
 target_sub = 'Jaribio'
@@ -14,7 +17,8 @@ selftext = '#Users removed\n\n'
 
 # opens, reads, and returns a resource
 def read_resource(resource_filename):
-    return open('Resources/' + resource_filename).read()
+    return open(os.path.abspath(os.path.join('Resources',
+                                             resource_filename))).read()
 
 
 # load sensitive data (and total user log number)
@@ -25,76 +29,86 @@ username = read_resource('username.txt')
 total_user_logs = int(read_resource('TotalUserLogs.txt'))
 
 # log in to Reddit
-reddit = praw.Reddit(client_id=client_id,
-                     client_secret=client_secret,
-                     user_agent='Private Sub Manager',
-                     username=username,
-                     password=password)
+reddit = praw.Reddit(
+    client_id=client_id,
+    client_secret=client_secret,
+    user_agent='Private Sub Manager',
+    username=username,
+    password=password)
 
 
-# function sets a flair to test if a user exists or not
-def is_user_deleted(user):
+# function gets a user's fullname to test if a user exists or not
+def is_user_deleted(new_user_var):
     try:
-        reddit.redditor(user.strip()).fullname
-    except:
+        reddit.redditor(name=new_user_var).fullname
+    except prawcore.exceptions.NotFound:
         return True
     else:
         return False
 
+shutil.copyfile(
+    os.path.abspath('UserList.txt'),
+    os.path.abspath('UserList %s.txt' % time_string))
 
-user_list = open('UserList.txt').readlines()
-open('UserList %s.txt' % time_string, 'w+').writelines(user_list)
-for i, user in enumerate(user_list):
-    user_list[i] = user.strip()
+user_list = list(map(str.strip, open(os.path.abspath('UserList.txt')).read().split('\n')))
+if user_list[-1] == '':
+    del user_list[-1]
 
 # find which users posted and commented
-participated = []
-not_participated = []
+participated = {
+    submission.author.name.strip()
+    for submission in reddit.subreddit(target_sub).submissions(week_ago, now)
+}
+
 old_comments = False
-for submission in reddit.subreddit(target_sub).submissions(week_ago, now):
-    participated.append(submission.author)
 for comment in reddit.subreddit(target_sub).comments(limit=600):
     if comment.created_utc > week_ago:
-        participated.append(comment.author)
+        participated.add(comment.author.name.strip())
     else:
         old_comments = True
-for i, user in enumerate(participated):
-    participated[i] = user.name.strip()
 if not old_comments:
-    print('Not all comments from the past week have been retrieved. Exiting. Raise number of comments fetched.')
+    print(
+        'Not all comments from the past week have been retrieved. Exiting. Raise number of comments fetched.'
+    )
     with open('Bot failed at %s.txt' % time_string, 'w+') as f:
         f.write(
-            'The bot failed due to not retrieving all comments from the past week. Up the limit in line 48 and retry.')
+            'The bot failed due to not retrieving all comments from the past week. Up the limit in line 48 and retry.'
+        )
     exit()
 
 # Add all non-participators to a list
-for user in user_list:
-    if is_user_deleted(user) or not participated.__contains__(user.strip()):
-        not_participated.append(user.strip())
+to_remove = set(filter(lambda x: is_user_deleted(x) or x not in participated, user_list))
 
 # attempt to flair and remove NotParticipated users
-for user in not_participated:
+for user in to_remove:
     try:
-        reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='Removed', css_class='kicked')
-        print('Flaired %s' % user)
-        reddit.subreddit(target_sub).contributor.remove(user.strip())
+        reddit.subreddit(target_sub).flair.set(
+            redditor=user,  # commentOutToTest
+            text='Removed',
+            css_class='kicked')
+        print('Flaired %s.' % user)
+        reddit.subreddit(target_sub).contributor.remove(
+            user.strip())  # commentOutToTest
         print('Removed %s' % user)
-    except:
-        print('Removed user %s does not exist. Everything should proceed as planned.' % user.strip())
+    except prawcore.exceptions.BadRequest:
+        print(
+            'Removed user %s does not exist. Everything should proceed as planned.'
+            % user.strip())
     else:
-        print('Flaired %s as removed.' % user.strip())
+        print('Flaired and removed %s.' % user.strip())
 
 # log kicked users
-with open('Removed ' + time_string + '.txt', 'w+') as f:
-    for user in not_participated:
+with open(os.path.abspath('Removed %s.txt' % time_string), 'w+') as f:
+    for user in to_remove:
         f.write(user.strip() + '\n')
 # update selftext with kicked users and their numbers *before* they are removed from the user list.
-for user in not_participated:
-    selftext += ('\\#%s - /u/%s  \n' % (str((user_list.index(user)) + 1), user.strip()))
+for user in to_remove:
+    selftext += ('\\#%s - /u/%s  \n' %
+                 (str((user_list.index(user)) + 1), user.strip()))
 # remove users, THE RIGHT WAY, without skipping over some of them randomly
 user_list_copy = user_list[:]
 for user in user_list_copy:
-    if not_participated.__contains__(user.strip()):
+    if to_remove.__contains__(user.strip()):
         user_list.remove(user.strip())
 
 
@@ -102,23 +116,35 @@ for user in user_list_copy:
 def flair_existing_users():
     for i, user in enumerate(user_list):
         if i == 0:
-            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#1', css_class='goldnumber')
-            print("Flaired %s." % user)
+            reddit.subreddit(target_sub).flair.set(
+                redditor=user.strip(),  # commentOutToTest
+                text='#1',
+                css_class='goldnumber')
+            print('Flaired %s.' % user)
         elif i == 1:
-            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#2', css_class='silver')
-            print("Flaired %s." % user)
+            reddit.subreddit(target_sub).flair.set(
+                redditor=user.strip(),  # commentOutToTest
+                text='#2',
+                css_class='silver')
+            print('Flaired %s.' % user)
         elif i == 2:
-            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#3', css_class='bronze')
-            print("Flaired %s." % user)
+            reddit.subreddit(target_sub).flair.set(
+                redditor=user.strip(),  # commentOutToTest
+                text='#3',
+                css_class='bronze')
+            print('Flaired %s.' % user)
         else:
-            reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#%d' % (i + 1), css_class='number')
-            print("Flaired %s." % user)
+            reddit.subreddit(target_sub).flair.set(
+                redditor=user.strip(),  # commentOutToTest
+                text='#%d' % (i + 1),
+                css_class='number')
+            print('Flaired %s.' % user)
 
 
 flair_existing_users()
 
 # Determine how many users must be added, create a file named after the time, and get that many users and save to file
-num_to_add = max(min(len(not_participated), 25), 10)
+num_to_add = max(min(len(to_remove), 25), 10)
 
 # get 30 comments and put their authors in RawNewComments
 raw_new_comments = []
@@ -142,28 +168,36 @@ num_old_users = len(user_list)
 # add the new users to selftext, then post it.
 selftext += '\n#Users added\n\n'
 for i, user in enumerate(new_users):
-    selftext += ('\\#%s - /u/%s  \n' % (str(num_old_users + i + 1), user.strip()))
-reddit.subreddit(target_sub).submit('Jaribio user log #%s' % str(total_user_logs + 1), selftext=selftext,
-                                    resubmit=False)
-print("Submitted")
+    selftext += ('\\#%s - /u/%s  \n' %
+                 (str(num_old_users + i + 1), user.strip()))
+reddit.subreddit(target_sub).submit(  # commentOutToTest the submit block
+    'Jaribio user log #%s' % str(total_user_logs + 1),
+    selftext=selftext,
+    resubmit=False)
+print('Submitted')
+print(selftext)
 # sticky it
-for submission in reddit.redditor(name=username).submissions.new(limit=1):
+for submission in reddit.redditor(name=username).submissions.new(
+        limit=1):  # commentOutToTest
     new_post = submission.id
 reddit.submission(id=new_post).mod.distinguish(how='yes', sticky=True)
-print("Distinguished")
-reddit.submission(id=new_post).mod.sticky()
-print("Stickied")
+print('Distinguished')
+reddit.submission(id=new_post).mod.sticky() # commentOutToTest
+print('Stickied')
 # after posting, increment the total number of user logs
 with open('Resources/TotalUserLogs.txt', 'w+') as f:
     f.write(str(total_user_logs + 1))
 
 # for each new user in the file, add then as approved submitters and flair them.
 for i, user in enumerate(new_users):
-    reddit.subreddit(target_sub).flair.set(redditor=user.strip(), text='#%d' % (num_old_users + i + 1),
-                                           css_class='numbernew')
+    reddit.subreddit(target_sub).flair.set(
+        redditor=user.strip(),  # commentOutToTest
+        text='#%d' % (num_old_users + i + 1),
+        css_class='numbernew')
     print('Flaired ' + user.strip() + ' as new.')
-    reddit.subreddit(target_sub).contributor.add(user.strip())
-    print('Removed %s.' % user)
+    reddit.subreddit(target_sub).contributor.add(
+        user.strip())  # commentOutToTest
+    print('Added %s.' % user)
 
 # rewrite UserList.txt with all removed users gone
 with open('UserList.txt', 'w+') as f:
