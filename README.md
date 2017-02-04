@@ -12,7 +12,7 @@ Python code for /u/Jaribio, the bot who runs /r/Jaribio
    name3
    ```
 
-   (list Reddit usernames followed imediately by newlines (no spaces). Make sure the file ends in a newline.
+   (list Reddit usernames followed imediately by newlines (no spaces). **Make sure the file ends in a newline**.
 
 3. In the directory you plan to run the script from, create a directory named `Resources`
 4. In resources, create the following files (each with no spaces or newlines at the end of the file):
