@@ -37,32 +37,33 @@ reddit = praw.Reddit(
     password=password)
 
 
-# function sets a flair to test if a user exists or not
-def is_user_deleted(user):
+# function gets a user's fullname to test if a user exists or not
+def is_user_deleted(new_user_var):
     try:
-        reddit.redditor(user).fullname
+        reddit.redditor(name=new_user_var).fullname
     except prawcore.exceptions.NotFound:
         return True
     else:
         return False
 
-
 shutil.copyfile(
     os.path.abspath('UserList.txt'),
     os.path.abspath('UserList %s.txt' % time_string))
 
-user_list = map(str.strip, read_resource('user_list').split('\n'))
+user_list = list(map(str.strip, open(os.path.abspath('UserList.txt')).read().split('\n')))
+if user_list[-1] == '':
+    del user_list[-1]
 
 # find which users posted and commented
 participated = {
-    submission.author.strip()
+    submission.author.name.strip()
     for submission in reddit.subreddit(target_sub).submissions(week_ago, now)
 }
-to_remove = set()
+
 old_comments = False
 for comment in reddit.subreddit(target_sub).comments(limit=600):
     if comment.created_utc > week_ago:
-        participated.add(comment.author.strip())
+        participated.add(comment.author.name.strip())
     else:
         old_comments = True
 if not old_comments:
@@ -76,7 +77,7 @@ if not old_comments:
     exit()
 
 # Add all non-participators to a list
-to_remove = set(filter(lambda x: is_user_deleted(user) or x not in participated, user_list))
+to_remove = set(filter(lambda x: is_user_deleted(x) or x not in participated, user_list))
 
 # attempt to flair and remove NotParticipated users
 for user in to_remove:
@@ -85,7 +86,7 @@ for user in to_remove:
             redditor=user,  # commentOutToTest
             text='Removed',
             css_class='kicked')
-        print('Flaired %s' % user)
+        print('Flaired %s.' % user)
         reddit.subreddit(target_sub).contributor.remove(
             user.strip())  # commentOutToTest
         print('Removed %s' % user)
@@ -94,10 +95,10 @@ for user in to_remove:
             'Removed user %s does not exist. Everything should proceed as planned.'
             % user.strip())
     else:
-        print('Flaired %s as removed.' % user.strip())
+        print('Flaired and removed %s.' % user.strip())
 
 # log kicked users
-with open(os.path.abspath('Removed %s.txt' % time_string, 'w+') as f:
+with open(os.path.abspath('Removed %s.txt' % time_string), 'w+') as f:
     for user in to_remove:
         f.write(user.strip() + '\n')
 # update selftext with kicked users and their numbers *before* they are removed from the user list.
@@ -177,11 +178,11 @@ print('Submitted')
 print(selftext)
 # sticky it
 for submission in reddit.redditor(name=username).submissions.new(
-        limit=1):  # commentOutToTest this and the following
+        limit=1):  # commentOutToTest
     new_post = submission.id
 reddit.submission(id=new_post).mod.distinguish(how='yes', sticky=True)
 print('Distinguished')
-reddit.submission(id=new_post).mod.sticky()
+reddit.submission(id=new_post).mod.sticky() # commentOutToTest
 print('Stickied')
 # after posting, increment the total number of user logs
 with open('Resources/TotalUserLogs.txt', 'w+') as f:
