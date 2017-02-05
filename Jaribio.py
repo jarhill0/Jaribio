@@ -77,7 +77,7 @@ if not old_comments:
     exit()
 
 # Add all non-participators to a list
-to_remove = set(filter(lambda x: is_user_deleted(x) or x not in participated, user_list))
+to_remove = list(filter(lambda x: is_user_deleted(x) or x not in participated, user_list))
 
 # attempt to flair and remove NotParticipated users
 for user in to_remove:
