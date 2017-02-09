@@ -3,6 +3,7 @@ import os
 import time
 import prawcore
 import praw
+from update_sidebar import update_sidebar
 
 # Configuration
 target_sub = 'Jaribio'
@@ -207,3 +208,7 @@ with open('UserList.txt', 'w+') as f:
 with open('UserList.txt', 'a+') as f:
     for user in new_users:
         f.write(user.strip() + '\n')
+
+# must be called after writing out UserList.txt, because it pulls the user list from there.
+update_sidebar(target_sub)
+
