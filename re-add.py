@@ -46,7 +46,7 @@ def again():
 
 def re_add():
     user_list = list(map(str.strip, open(os.path.abspath('UserList.txt')).read().split('\n')))
-    total_re_adds = int(read_resource('total_re_adds.txt'))
+    total_re_adds = int(read_resource('total_re_adds.txt').strip())
     if user_list[-1] == '':
         del user_list[-1]
     re_add_user = input('User re-adder for /r/%s:\nUsername to re-add? ' % target_sub)
