@@ -1,0 +1,76 @@
+import os
+import praw
+import prawcore
+
+
+def is_user_deleted(new_user_var):
+    try:
+        reddit.redditor(name=new_user_var).fullname
+    except prawcore.exceptions.NotFound:
+        return True
+    else:
+        return False
+
+
+# opens, reads, and returns a resource
+def read_resource(resource_filename):
+    return open(os.path.abspath(os.path.join('Resources',
+                                             resource_filename))).read()
+
+
+target_sub = 'Jaribio'
+
+# load sensitive data (and total user log number)
+password = read_resource('password.txt')
+client_id = read_resource('client_id.txt')
+client_secret = read_resource('client_secret.txt')
+username = read_resource('username.txt')
+
+
+# log in to Reddit
+reddit = praw.Reddit(
+    client_id=client_id,
+    client_secret=client_secret,
+    user_agent='Private Sub Manager',
+    username=username,
+    password=password)
+
+
+def again():
+    choice = input('Re-add another user? [y/n] ').lower()
+    if choice in ['y', 'yes']:
+        return True
+    else:
+        return False
+
+
+def re_add():
+    user_list = list(map(str.strip, open(os.path.abspath('UserList.txt')).read().split('\n')))
+    total_re_adds = int(read_resource('total_re_adds.txt'))
+    if user_list[-1] == '':
+        del user_list[-1]
+    re_add_user = input('User re-adder for /r/%s:\nUsername to re-add? ' % target_sub)
+    if is_user_deleted(re_add_user):
+        print('Not a valid username.')
+        if again():
+            re_add()
+    else:
+        reddit.subreddit(target_sub).flair.set(  # commentOutToTest
+            redditor=re_add_user,
+            text='#%d' % (len(user_list) + 1),
+            css_class='number')
+        reddit.subreddit(target_sub).contributor.add(
+            re_add_user)  # commentOutToTest
+        reddit.subreddit(target_sub).submit(  # commentOutToTest
+            'User re-add #%s' % str(total_re_adds + 1),
+            selftext='\\#%s — /u/%s' % (str(total_re_adds + 1), re_add_user),
+            resubmit=False)
+        with open('UserList.txt', 'a+') as f:
+            f.write(re_add_user + '\n')
+        with open('Resources/total_re_adds.txt', 'w+') as f:
+            f.write(str(total_re_adds + 1))
+        if again():
+            re_add()
+
+
+re_add()
