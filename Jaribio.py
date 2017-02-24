@@ -52,7 +52,7 @@ if user_list[-1] == '':
 # find which users posted and commented
 participated = {
     submission.author.name.strip()
-    for submission in reddit.subreddit(target_sub).submissions(week_ago, now)
+    for submission in reddit.subreddit(target_sub).submissions(start=week_ago, end=now)
     }
 
 old_comments = False
