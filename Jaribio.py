@@ -22,20 +22,12 @@ def read_resource(resource_filename):
                                              resource_filename))).read()
 
 
-# load sensitive data (and total user log number)
-password = read_resource('password.txt')
-client_id = read_resource('client_id.txt')
-client_secret = read_resource('client_secret.txt')
-username = read_resource('username.txt')
+# load total user log number
 total_user_logs = int(read_resource('TotalUserLogs.txt'))
 
 # log in to Reddit
-reddit = praw.Reddit(
-    client_id=client_id,
-    client_secret=client_secret,
-    user_agent='Private Sub Manager',
-    username=username,
-    password=password)
+reddit = praw.Reddit('Jaribio',
+                     user_agent='Private Sub Manager', )
 
 
 # function gets a user's fullname to test if a user exists or not
@@ -46,6 +38,7 @@ def is_user_deleted(new_user_var):
         return True
     else:
         return False
+
 
 shutil.copyfile(
     os.path.abspath('UserList.txt'),
@@ -59,7 +52,7 @@ if user_list[-1] == '':
 participated = {
     submission.author.name.strip()
     for submission in reddit.subreddit(target_sub).submissions(week_ago, now)
-}
+    }
 
 old_comments = False
 for comment in reddit.subreddit(target_sub).comments(limit=600):
@@ -183,7 +176,7 @@ for submission in reddit.redditor(name=username).submissions.new(
     new_post = submission.id
 reddit.submission(id=new_post).mod.distinguish(how='yes', sticky=True)
 print('Distinguished')
-reddit.submission(id=new_post).mod.sticky() # commentOutToTest
+reddit.submission(id=new_post).mod.sticky()  # commentOutToTest
 print('Stickied')
 # after posting, increment the total number of user logs
 with open('Resources/TotalUserLogs.txt', 'w+') as f:
@@ -211,4 +204,3 @@ with open('UserList.txt', 'a+') as f:
 
 # must be called after writing out UserList.txt, because it pulls the user list from there.
 update_sidebar(target_sub)
-

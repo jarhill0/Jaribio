@@ -20,20 +20,9 @@ def read_resource(resource_filename):
 
 target_sub = 'Jaribio'
 
-# load sensitive data (and total user log number)
-password = read_resource('password.txt')
-client_id = read_resource('client_id.txt')
-client_secret = read_resource('client_secret.txt')
-username = read_resource('username.txt')
-
-
 # log in to Reddit
-reddit = praw.Reddit(
-    client_id=client_id,
-    client_secret=client_secret,
-    user_agent='Private Sub Manager',
-    username=username,
-    password=password)
+reddit = praw.Reddit('Jaribio',
+                     user_agent='Private Sub Manager', )
 
 
 def again():
