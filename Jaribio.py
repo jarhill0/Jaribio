@@ -3,6 +3,7 @@ import os
 import time
 import prawcore
 import praw
+import post_gist
 from update_sidebar import update_sidebar
 
 # Configuration
@@ -57,7 +58,10 @@ participated = {
 old_comments = False
 for comment in reddit.subreddit(target_sub).comments(limit=600):
     if comment.created_utc > week_ago:
-        participated.add(comment.author.name.strip())
+        try:
+            participated.add(comment.author.name.strip())
+        except AttributeError:
+            print('Bot detected a comment from a deleted user. Skipping over.')
     else:
         old_comments = True
 if not old_comments:
@@ -76,13 +80,13 @@ to_remove = list(filter(lambda x: is_user_deleted(x) or x not in participated, u
 # attempt to flair and remove NotParticipated users
 for user in to_remove:
     try:
-        reddit.subreddit(target_sub).flair.set(
-            redditor=user,  # commentOutToTest
+        reddit.subreddit(target_sub).flair.set(  # commentOutToTest
+            redditor=user,
             text='Removed',
             css_class='kicked')
         print('Flaired %s.' % user)
-        reddit.subreddit(target_sub).contributor.remove(
-            user.strip())  # commentOutToTest
+        reddit.subreddit(target_sub).contributor.remove(  # commentOutToTest
+            user.strip())
         print('Removed %s' % user)
     except prawcore.exceptions.BadRequest:
         print(
@@ -110,26 +114,26 @@ for user in user_list_copy:
 def flair_existing_users():
     for i, user in enumerate(user_list):
         if i == 0:
-            reddit.subreddit(target_sub).flair.set(
-                redditor=user.strip(),  # commentOutToTest
+            reddit.subreddit(target_sub).flair.set(  # commentOutToTest
+                redditor=user.strip(),
                 text='#1',
                 css_class='goldnumber')
             print('Flaired %s.' % user)
         elif i == 1:
-            reddit.subreddit(target_sub).flair.set(
-                redditor=user.strip(),  # commentOutToTest
+            reddit.subreddit(target_sub).flair.set(  # commentOutToTest
+                redditor=user.strip(),
                 text='#2',
                 css_class='silver')
             print('Flaired %s.' % user)
         elif i == 2:
-            reddit.subreddit(target_sub).flair.set(
-                redditor=user.strip(),  # commentOutToTest
+            reddit.subreddit(target_sub).flair.set(  # commentOutToTest
+                redditor=user.strip(),
                 text='#3',
                 css_class='bronze')
             print('Flaired %s.' % user)
         else:
-            reddit.subreddit(target_sub).flair.set(
-                redditor=user.strip(),  # commentOutToTest
+            reddit.subreddit(target_sub).flair.set(  # commentOutToTest
+                redditor=user.strip(),
                 text='#%d' % (i + 1),
                 css_class='number')
             print('Flaired %s.' % user)
@@ -141,40 +145,48 @@ flair_existing_users()
 num_to_add = max(min(len(to_remove), 25), 10)
 
 # get 30 comments and put their authors in RawNewComments
-raw_new_comments = []
-for comment in reddit.subreddit('all').comments(limit=30):
-    raw_new_comments.append(comment.author.name)
+raw_new_comment_authors = []
+raw_new_comment_urls = []
+for comment in reddit.subreddit('all').comments(limit=40):
+    raw_new_comment_authors.append(comment.author.name)
+    raw_new_comment_urls.append('https://reddit.com' + comment.permalink(fast=True))
 
 # open a file; add users from raw_new_comments if we still need users and they are not already in user_list
+comments_for_entry = []
 with open('New users %s.txt' % time_string, 'w+') as f:
     n = 0
-    for user in raw_new_comments:
+    for i, user in enumerate(raw_new_comment_authors):
         if n < num_to_add and not user_list.__contains__(user.strip()):
             # open the new user file and read it line by line
             f.write(str(user.strip()) + '\n')
+            comments_for_entry.append(raw_new_comment_urls[i])
             n += 1
 
 new_users = open('New users %s.txt' % time_string, 'r').readlines()
 for i, user in enumerate(new_users):
     new_users[i] = user.strip()
 
+gist_body = '#Comments for entry on %s\n\n' % time_string
+for i, user in enumerate(new_users):
+    gist_body += '%s : %s  \n' % (user, comments_for_entry[i])
+gist_url = post_gist.make_gist(gist_body, time_string)
+
 num_old_users = len(user_list)
 # add the new users to selftext, then post it.
-selftext += '\n#Users added\n\n'
+selftext += '\n#Users added\n\n[Comments for entry](%s)\n\n' % gist_url
 for i, user in enumerate(new_users):
     selftext += ('\\#%s - /u/%s  \n' %
                  (str(num_old_users + i + 1), user.strip()))
-reddit.subreddit(target_sub).submit(  # commentOutToTest the submit block
+reddit.subreddit(target_sub).submit(  # commentOutToTest
     'Jaribio user log #%s' % str(total_user_logs + 1),
     selftext=selftext,
     resubmit=False)
 print('Submitted')
 print(selftext)
 # sticky it
-for submission in reddit.redditor(name=username).submissions.new(
-        limit=1):  # commentOutToTest
+for submission in reddit.redditor(name=username).submissions.new(limit=1):
     new_post = submission.id
-reddit.submission(id=new_post).mod.distinguish(how='yes', sticky=True)
+reddit.submission(id=new_post).mod.distinguish(how='yes', sticky=True)  # commentOutToTest
 print('Distinguished')
 reddit.submission(id=new_post).mod.sticky()  # commentOutToTest
 print('Stickied')
@@ -184,13 +196,13 @@ with open('Resources/TotalUserLogs.txt', 'w+') as f:
 
 # for each new user in the file, add then as approved submitters and flair them.
 for i, user in enumerate(new_users):
-    reddit.subreddit(target_sub).flair.set(
-        redditor=user.strip(),  # commentOutToTest
+    reddit.subreddit(target_sub).flair.set(  # commentOutToTest
+        redditor=user.strip(),
         text='#%d' % (num_old_users + i + 1),
         css_class='numbernew')
     print('Flaired ' + user.strip() + ' as new.')
-    reddit.subreddit(target_sub).contributor.add(
-        user.strip())  # commentOutToTest
+    reddit.subreddit(target_sub).contributor.add(  # commentOutToTest
+        user.strip())
     print('Added %s.' % user)
 
 # rewrite UserList.txt with all removed users gone
@@ -203,4 +215,4 @@ with open('UserList.txt', 'a+') as f:
         f.write(user.strip() + '\n')
 
 # must be called after writing out UserList.txt, because it pulls the user list from there.
-update_sidebar(target_sub)
+# update_sidebar(target_sub)  # commentOutToTest
