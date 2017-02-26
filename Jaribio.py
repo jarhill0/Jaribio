@@ -165,6 +165,8 @@ with open('New users %s.txt' % time_string, 'w+') as f:
 new_users = open('New users %s.txt' % time_string, 'r').readlines()
 for i, user in enumerate(new_users):
     new_users[i] = user.strip()
+if new_users[-1] == '':
+    del new_users[-1]
 
 gist_body = '#Comments for entry on %s\n\n' % time_string
 for i, user in enumerate(new_users):
