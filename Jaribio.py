@@ -177,18 +177,16 @@ selftext += '\n#Users added\n\n[Comments for entry](%s)\n\n' % gist_url
 for i, user in enumerate(new_users):
     selftext += ('\\#%s - /u/%s  \n' %
                  (str(num_old_users + i + 1), user.strip()))
-reddit.subreddit(target_sub).submit(  # commentOutToTest
+new_post = reddit.subreddit(target_sub).submit(  # commentOutToTest
     'Jaribio user log #%s' % str(total_user_logs + 1),
     selftext=selftext,
     resubmit=False)
 print('Submitted')
 print(selftext)
 # sticky it
-for submission in reddit.redditor(name=username).submissions.new(limit=1):
-    new_post = submission.id
-reddit.submission(id=new_post).mod.distinguish(how='yes', sticky=True)  # commentOutToTest
+reddit.submission(id=new_post.id).mod.distinguish(how='yes', sticky=True)  # commentOutToTest
 print('Distinguished')
-reddit.submission(id=new_post).mod.sticky()  # commentOutToTest
+reddit.submission(id=new_post.id).mod.sticky()  # commentOutToTest
 print('Stickied')
 # after posting, increment the total number of user logs
 with open('Resources/TotalUserLogs.txt', 'w+') as f:
@@ -215,4 +213,4 @@ with open('UserList.txt', 'a+') as f:
         f.write(user.strip() + '\n')
 
 # must be called after writing out UserList.txt, because it pulls the user list from there.
-# update_sidebar(target_sub)  # commentOutToTest
+update_sidebar(target_sub)  # commentOutToTest
