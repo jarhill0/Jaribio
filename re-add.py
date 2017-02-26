@@ -50,7 +50,7 @@ def re_add():
             css_class='number')
         reddit.subreddit(target_sub).contributor.add(
             re_add_user)  # commentOutToTest
-        reddit.subreddit(target_sub).submit(  # commentOutToTest
+        new_post = reddit.subreddit(target_sub).submit(  # commentOutToTest
             'User re-add #%s' % str(total_re_adds + 1),
             selftext='\\#%s — /u/%s' % (str(total_re_adds + 1), re_add_user),
             resubmit=False)
@@ -58,6 +58,7 @@ def re_add():
             f.write(re_add_user + '\n')
         with open('Resources/total_re_adds.txt', 'w+') as f:
             f.write(str(total_re_adds + 1))
+        reddit.submission(id=new_post.id).mod.distinguish(how='yes', sticky=False)
         if again():
             re_add()
 
