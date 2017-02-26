@@ -1,6 +1,7 @@
 import os
 import praw
 import prawcore
+from update_sidebar import update_sidebar
 
 
 def is_user_deleted(new_user_var):
@@ -58,6 +59,7 @@ def re_add():
             f.write(re_add_user + '\n')
         with open('Resources/total_re_adds.txt', 'w+') as f:
             f.write(str(total_re_adds + 1))
+        update_sidebar(target_sub)
         reddit.submission(id=new_post.id).mod.distinguish(how='yes', sticky=False)
         if again():
             re_add()
