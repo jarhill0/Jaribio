@@ -1,14 +1,12 @@
 import praw
 import os
-
-target_sub = 'Jaribio'
-
-# log in to Reddit
-reddit = praw.Reddit('Jaribio',
-                     user_agent='Private Sub Manager', )
+from config import target_sub
 
 
 def update_sidebar(target_sub):
+    # log in to Reddit
+    reddit = praw.Reddit(target_sub, user_agent='Private Sub Manager', )
+
     user_list = list(map(str.strip, open(os.path.abspath('UserList.txt')).read().split('\n')))
     if user_list[-1] == '':
         del user_list[-1]
@@ -25,3 +23,7 @@ def update_sidebar(target_sub):
 
     print(sidebar)
     reddit.subreddit(target_sub).mod.update(description=sidebar)
+
+
+if __name__ == '__main__':
+    update_sidebar(target_sub)
