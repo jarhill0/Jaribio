@@ -134,25 +134,25 @@ def flair_existing_users():
 
             elif style == 'Jaribio':
                 if i == 0:
-                    reddit.subreddit(target_sub).flair.set(  # commentOutToTest
+                    reddit.subreddit(target_sub).flair.set(
                         redditor=user.strip(),
                         text='#1',
                         css_class='goldnumber')
                     print('Flaired %s.' % user)
                 elif i == 1:
-                    reddit.subreddit(target_sub).flair.set(  # commentOutToTest
+                    reddit.subreddit(target_sub).flair.set(
                         redditor=user.strip(),
                         text='#2',
                         css_class='silver')
                     print('Flaired %s.' % user)
                 elif i == 2:
-                    reddit.subreddit(target_sub).flair.set(  # commentOutToTest
+                    reddit.subreddit(target_sub).flair.set(
                         redditor=user.strip(),
                         text='#3',
                         css_class='bronze')
                     print('Flaired %s.' % user)
                 else:
-                    reddit.subreddit(target_sub).flair.set(  # commentOutToTest
+                    reddit.subreddit(target_sub).flair.set(
                         redditor=user.strip(),
                         text='#%d' % (i + 1),
                         css_class='number')
@@ -238,7 +238,7 @@ print(selftext)
 if not testing:
     reddit.submission(id=new_post.id).mod.distinguish(how='yes', sticky=True)
 print('Distinguished')
-if style == 'Jaribio':
+if style == 'Jaribio' and not testing:
     reddit.submission(id=new_post.id).mod.sticky()
     print('Stickied')
 
@@ -270,4 +270,3 @@ with open('UserList.txt', 'a+') as f:
 # must be called after writing out UserList.txt, because it pulls the user list from there.
 if style == 'Jaribio' and not testing:
     update_sidebar(target_sub)
-
