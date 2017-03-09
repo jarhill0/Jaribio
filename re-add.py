@@ -53,7 +53,7 @@ def re_add():
             re_add_user)  # commentOutToTest
         new_post = reddit.subreddit(target_sub).submit(  # commentOutToTest
             'User re-add #%s' % str(total_re_adds + 1),
-            selftext='\\#%s — /u/%s' % (str(total_re_adds + 1), re_add_user),
+            selftext='\\#%s — /u/%s' % (str(len(user_list) + 1), re_add_user),
             resubmit=False)
         with open('UserList.txt', 'a+') as f:
             f.write(re_add_user + '\n')
