@@ -3,9 +3,9 @@ import os
 from config import target_sub
 
 
-def update_sidebar(target_sub):
+def update_sidebar(target_sub_for_sidebar_update):
     # log in to Reddit
-    reddit = praw.Reddit(target_sub, user_agent='Private Sub Manager', )
+    reddit = praw.Reddit(target_sub_for_sidebar_update, user_agent='Private Sub Manager', )
 
     user_list = list(map(str.strip, open(os.path.abspath('UserList.txt')).read().split('\n')))
     if user_list[-1] == '':
@@ -22,7 +22,7 @@ def update_sidebar(target_sub):
     sidebar += sidebar_2
 
     print(sidebar)
-    reddit.subreddit(target_sub).mod.update(description=sidebar)
+    reddit.subreddit(target_sub_for_sidebar_update).mod.update(description=sidebar)
 
 
 if __name__ == '__main__':

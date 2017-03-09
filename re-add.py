@@ -2,6 +2,7 @@ import os
 import praw
 import prawcore
 from update_sidebar import update_sidebar
+from config import target_sub
 
 
 def is_user_deleted(new_user_var):
@@ -19,10 +20,8 @@ def read_resource(resource_filename):
                                              resource_filename))).read()
 
 
-target_sub = 'Jaribio'
-
 # log in to Reddit
-reddit = praw.Reddit('Jaribio',
+reddit = praw.Reddit(target_sub,
                      user_agent='Private Sub Manager', )
 
 
@@ -65,4 +64,5 @@ def re_add():
             re_add()
 
 
-re_add()
+if __name__ == '__main__':
+    re_add()
