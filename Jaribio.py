@@ -5,6 +5,7 @@ import prawcore
 import praw
 import post_gist
 from update_sidebar import update_sidebar
+from update_title import update_title
 
 # Configuration
 target_sub = 'Jaribio'
@@ -193,6 +194,8 @@ print('Stickied')
 # after posting, increment the total number of user logs
 with open('Resources/TotalUserLogs.txt', 'w+') as f:
     f.write(str(total_user_logs + 1))
+
+update_title(target_sub)
 
 # for each new user in the file, add then as approved submitters and flair them.
 for i, user in enumerate(new_users):
