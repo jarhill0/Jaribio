@@ -170,7 +170,7 @@ if new_users[-1] == '':
 
 gist_body = '#Comments for entry on %s\n\n' % time_string
 for i, user in enumerate(new_users):
-    gist_body += '%s : %s  \n' % (user, comments_for_entry[i])
+    gist_body += '%s: %s  \n' % (user, comments_for_entry[i])
 gist_url = post_gist.make_gist(gist_body, time_string)
 
 num_old_users = len(user_list)
