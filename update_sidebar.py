@@ -25,3 +25,7 @@ def update_sidebar(target_sub):
 
     print(sidebar)
     reddit.subreddit(target_sub).mod.update(description=sidebar)
+
+
+if __name__ == '__main__':
+    update_sidebar(target_sub)
