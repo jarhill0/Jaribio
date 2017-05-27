@@ -1,5 +1,5 @@
 # Jaribio
-Python code for /u/Jaribio, the bot who runs /r/Jaribio
+Python code for /u/Jaribio, the bot who runs /r/Jaribio. New version can be found at https://github.com/jarhill0/PrivateSubBot.
 
 ## Guide to configuration (may not be complete):
 
